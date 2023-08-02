@@ -28,27 +28,7 @@ def get_stock_data(tickers, start_date, end_date):
     end_date = '2023-07-14'  # End date of the date range
     stock_data = get_stock_data(tickers, start_date, end_date)
     """
-    errors = []  # List to store error messages
-    data = pd.DataFrame()
-
-    for ticker in tickers:
-        try:
-            # Fetch data for each ticker symbol
-            ticker_data = yf.download(
-                ticker, start=start_date, end=end_date, progress=False
-            )
-
-            if not ticker_data.empty:
-                # Concatenate data for each ticker symbol
-                data = pd.concat([data, ticker_data])
-            else:
-                errors.append(f"No data found for {ticker} in the given date range.")
-        except Exception as e:
-            errors.append(f"Error occurred for {ticker}: {e}")
-
-    if errors:
-        # Display a single warning message with all the errors combined
-        st.warning("\n".join(errors))
+    data = yf.download(tickers, start=start_date, end=end_date, progress=False)
 
     return data
 
@@ -62,10 +42,18 @@ def get_ticker_info(ticker):
         ticker (str): The ticker symbol of the company to get information about.
 
     Returns:
-        dict: A dictionary containing information about the company.
+        dict: A dictionary containing information about the company, including income statement and balance sheet data.
     """
     ticker_info = yf.Ticker(ticker)
-    return ticker_info.info
+    info = ticker_info.info
+    # income_statement = ticker_info.financials
+    # balance_sheet = ticker_info.balance_sheet
+
+    # # Add income statement and balance sheet data to the info dictionary
+    # info['income_statement'] = income_statement.to_dict()
+    # info['balance_sheet'] = balance_sheet.to_dict()
+
+    return info
 
 
 def format_with_commas(number):
@@ -109,3 +97,5 @@ def format_with_commas_scale(number):
         magnitude += 1
 
     return "{:,.2f}{}".format(number, scales[magnitude])
+
+
