@@ -2,6 +2,12 @@ import yfinance as yf
 import streamlit as st
 import pandas as pd
 
+"""
+Market Garden Helper Module
+
+This module contains helper functions for the Market Garden application.
+"""
+
 
 @st.cache_data
 def get_stock_data(tickers, start_date, end_date):
@@ -48,7 +54,7 @@ def get_stock_data(tickers, start_date, end_date):
 
 
 @st.cache_data
-def ticker_info(ticker):
+def get_ticker_info(ticker):
     """
     Get information about a specific ticker from Yahoo Finance.
 

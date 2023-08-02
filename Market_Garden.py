@@ -1,8 +1,7 @@
-import streamlit as st
+from datetime import date, timedelta
 import pandas as pd
-from datetime import datetime, date, timedelta
-from marketgarden_helper import ticker_info, format_with_commas, get_stock_data
-
+import streamlit as st
+from market_garden_helper import get_ticker_info, format_with_commas, get_stock_data
 
 # Page config
 st.set_page_config(
@@ -34,7 +33,7 @@ with st.container():
     ):
         ticker_data = get_stock_data(ticker, start_date, end_date)
         st.dataframe(ticker_data, use_container_width=True)
-        ticker_info = ticker_info(ticker)
+        ticker_info = get_ticker_info(ticker)
         st.write("Name:", ticker_info.get("longName", "N/A"))
         st.write("Industry:", ticker_info.get("industry", "N/A"))
         st.write("Sector:", ticker_info.get("sector", "N/A"))
