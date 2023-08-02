@@ -1,0 +1,66 @@
+# https://www.fmlabs.com/reference/default.htm
+# https://www.alphavantage.co/support/#api-key
+#[DEFAULT]
+# API_KEY=1234
+
+# [HOME]
+# API_KEY=edc
+
+# import configparser
+
+# # Create a function to read the API key from the .secrets file
+# def get_api_key():
+#     config = configparser.ConfigParser()
+#     config.read(".secrets")
+#     return config.get("DEFAULT", "API_KEY")
+
+# # Example usage
+# def main():
+#     api_key = get_api_key()
+#     print("API Key:", api_key)
+#     # Use the API key in your API requests here
+
+# if __name__ == "__main__":
+#     main()
+
+
+import pandas as pd
+import yfinance as yf
+import streamlit as st
+
+def get_stock_price(ticker, start, end):
+    try:
+        data = yf.download(ticker, start, end)
+        if data.empty:
+            st.error("Did you type in the correct ticker?")
+            return None
+        #print(data)
+        return data
+    except ValueError:
+        print(f"Value Error")
+        return None
+    except Exception as e:
+        print(f"An Error occurred: {e}")
+        return None
+    
+ticker = 'aaplq'
+start ='2023-8-1'
+end = '2023-8-2'
+data = get_stock_price(ticker, start, end)
+if data is not None:
+    st.write(data)
+# def main():
+#     st.title("Historical Stock Price")
+#     stock_symbol = st.text_input("Enter Stock Symbol")
+#     start_date = st.date_input("Enter start date")
+#     end_date = st.date_input("Enter end date")
+#     if st.button("Download"):
+#         if stock_symbol and start_date and end_date:
+#             historical_data = get_stock_price(stock_symbol, start_date, end_date)
+#             if historical_data is not None:
+#                 st.write(historical_data)
+#             else:
+#                 st.warning(f"Stock symbol'{stock_symbol}' not found and error occurred.")
+
+# if __name__ == "__main__":
+#     main()
