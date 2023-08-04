@@ -1,44 +1,88 @@
-from datetime import date, timedelta
-import pandas as pd
+from datetime import datetime, timedelta
+import yfinance as yf
 import streamlit as st
-from market_garden_helper import get_ticker_info, format_with_commas, format_with_commas_scale, get_stock_data
-
 
 # Page config
 st.set_page_config(
-        page_title="MarketGarden",
-        layout="wide",
-        menu_items={"About": "tony.wei@outlook.com"},
-    )
+    page_title="Market Garden",
+    layout="wide",
+    menu_items={"About": "tony.wei@outlook.com"},
+)
 
-def main():
-# Input data container
-    with st.container():
-        with st.expander("Input", expanded=True):
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                ticker = st.text_input("Ticker", "msft")
-                st.write("DEBUG - Ticker:", ticker)  # Debug statement
-                
-            with col2:
-                # Calculate one year ago
-                five_year_ago = date.today() - timedelta(days=365 * 5)
-                start_date = st.date_input("Start Date", five_year_ago)
-            with col3:
-                end_date = st.date_input("End Date")
-  
 
-    # Histoical stock price and company info container
-    with st.expander(f"{ticker.upper()} Last 5 year price and Financial Data", expanded=True):
-        ticker_data = get_stock_data(tickers=ticker, start_date=start_date, end_date=end_date)
-        st.dataframe(ticker_data, use_container_width=True)
-        ticker_info = get_ticker_info(ticker)
-        st.write("Audit Risk:", ticker_info["auditRisk"])
-        recommendation = ticker_info["recommendationKey"]
-        st.markdown(f"Recommendation: {recommendation}", unsafe_allow_html=True)
-        st.write(ticker_info)
-                    
+def get_10_years_ago():
+    current_date = datetime.now()
+    ten_years_ago = current_date - timedelta(days=365 * 10)
+    return ten_years_ago
 
-    
-if __name__ == "__main__":
-    main()
+
+def validate_ticker(ticker):
+    """
+    Check if a ticker is valid by attempting to retrieve its historical data.
+
+    Arguments:
+    ticker -- a string representing the ticker symbol of a stock
+
+    Returns:
+    True if the ticker is valid and has historical data, False otherwise.
+    """
+    try:
+        stock = yf.Ticker(ticker)
+        # If the history is empty, this will also raise an error
+        hist = stock.history(period="1d")
+        if len(hist) == 0:
+            return False
+        else:
+            return True
+    except:
+        return False
+
+
+def get_history(ticker, start_date, end_date):
+    """
+    Retrieves the historical market data for a specific ticker within a date range.
+
+    Arguments:
+    ticker -- a string representing the ticker symbol of a stock
+    start_date -- a string or datetime object representing the start date of the range
+    end_date -- a string or datetime object representing the end date of the range
+
+    Returns:
+    A Pandas DataFrame containing the historical market data if successful.
+    If an error occurs, returns a string containing the error message.
+    """
+    try:
+        stock = yf.Ticker(ticker)
+        hist = stock.history(start=start_date, end=end_date)
+        return hist
+    except Exception as e:
+        return str(e)
+
+
+# Streamlit Code
+st.title("Market Garden")
+
+
+with st.expander("Data Input", expanded=True):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        ticker = st.text_input("Enter Ticker:", "AAPL")
+    with col2:
+        start_date = st.date_input("Enter Start Date:", get_10_years_ago())
+        # start_date = "2023-07-01"
+    with col3:
+        end_date = st.date_input("Enter End Date:", datetime.now())
+        # end_date = "2023-08-02"
+if st.button("Get Stock History"):
+    if validate_ticker(ticker):
+        with st.spinner("Fetching data..."):
+            data = get_history(ticker, start_date, end_date)
+        with st.expander(f"{ticker.upper()} Historical Data", expanded=True):
+            data = get_history(ticker, start_date, end_date)
+
+            if isinstance(data, str):
+                st.error("An error occurred: " + data)
+            else:
+                st.dataframe(data, use_container_width=True)
+    else:
+        st.error(f"{ticker.upper()} is not valid.")
